@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /dataset: memory_world
+  - /experiment: video_generation
+  - /algorithm: dfot_video

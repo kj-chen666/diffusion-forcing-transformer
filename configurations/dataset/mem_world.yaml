@@ -1,0 +1,11 @@
+defaults:
+  - base_video
+
+save_dir: /Users/kaijinchen/Documents/GitHub/Memory-World/dynamic_memory
+max_frames: 150
+frame_skip: 1
+context_length: 75
+resolution: 256
+external_cond_dim: 16
+external_cond_stack: false
+external_cond_processing: identity
