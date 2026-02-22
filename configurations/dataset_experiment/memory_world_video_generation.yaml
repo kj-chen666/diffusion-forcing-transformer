@@ -1,0 +1,42 @@
+# @package _global_
+
+# Dataset-specific overrides for DFoT on MemoryWorld-style 77->77 prediction.
+
+dataset:
+  num_eval_videos: 128
+  subdataset_size: null
+
+algorithm:
+  fixed_context:
+    enabled: true
+    dropout: 0.0
+  tasks:
+    prediction:
+      enabled: true
+      # Required when dataset.n_frames > algorithm.max_frames.
+      sliding_context_len: -1
+    interpolation:
+      enabled: false
+  logging:
+    max_num_videos: 8
+    # Start lightweight for bring-up; expand later if needed.
+    metrics: [mse, psnr, ssim]
+
+experiment:
+  training:
+    lr: 1e-4
+    batch_size: 4
+    max_epochs: 20
+    data:
+      num_workers: 8
+  validation:
+    batch_size: 2
+    val_every_n_epoch: 1
+    limit_batch: 32
+    data:
+      num_workers: 4
+  test:
+    batch_size: 2
+    limit_batch: 32
+    data:
+      num_workers: 4
