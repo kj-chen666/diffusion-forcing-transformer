@@ -3,6 +3,12 @@ defaults:
 
 # Raw mp4 root (scanned recursively by datasets/video/memory_world.py)
 save_dir: /Users/kaijinchen/Documents/GitHub/Memory-World/dynamic_memory
+# Caption-based sample list (aligned with vae_process_dataset.py)
+captions_path: ${dataset.save_dir}/captions.txt
+captions_root: ${dataset.save_dir}
+split_seed: 42
+train_ratio: 0.9
+metadata_num_workers: 16
 
 # Train with local temporal windows for memory/computation efficiency.
 max_frames: 32
