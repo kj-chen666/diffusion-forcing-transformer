@@ -31,6 +31,33 @@ def _parse_camera_matrix(data: Any) -> torch.Tensor:
     return torch.eye(4)
 
 
+def _extract_hemi_number(filename: str) -> Optional[str]:
+    """
+    Extract camera id like C_01_20mm from filename.
+    """
+    match = re.search(r"(C_\d{2}_\d+mm)", filename)
+    return match.group(1) if match else None
+
+
+def _parse_camera_value_for_frame(
+    value: Any,
+    hemi_number: Optional[str],
+) -> torch.Tensor:
+    """
+    Align camera parsing with vae_process_dataset.py:
+    - normal case: value is a matrix string/list
+    - hemi8 case: value is dict keyed by camera ids, e.g. value["C_01_20mm"]
+    """
+    if isinstance(value, dict):
+        if hemi_number is not None and hemi_number in value:
+            return _parse_camera_matrix(value[hemi_number])
+        # Fallback to first available camera entry for robustness.
+        if len(value) > 0:
+            return _parse_camera_matrix(next(iter(value.values())))
+        return torch.eye(4)
+    return _parse_camera_matrix(value)
+
+
 def _parse_caption_line(line: str) -> Optional[str]:
     """
     Parse lines like:
@@ -202,6 +229,7 @@ class MemoryWorldBaseVideoDataset(BaseVideoDataset):
     ) -> torch.Tensor:
         video_path = Path(video_metadata["video_paths"])
         candidate_dirs = [video_path.parent, video_path.parent.parent]
+        hemi_number = _extract_hemi_number(video_path.name)
 
         target_json = None
         for parent_dir in candidate_dirs:
@@ -227,7 +255,7 @@ class MemoryWorldBaseVideoDataset(BaseVideoDataset):
                 for i in range(149):
                     key = str(i)
                     if key in data:
-                        mat = _parse_camera_matrix(data[key])
+                        mat = _parse_camera_value_for_frame(data[key], hemi_number)
                     else:
                         mat = raw_matrices[-1] if raw_matrices else torch.eye(4)
                     raw_matrices.append(mat)

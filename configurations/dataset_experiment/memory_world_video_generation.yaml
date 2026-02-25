@@ -7,26 +7,51 @@ dataset:
   subdataset_size: null
 
 algorithm:
+  checkpoint:
+    strict: false
+    reset_optimizer: true
+  diffusion:
+    is_continuous: true
+    precond_scale: 0.125
+    loss_weighting:
+      strategy: sigmoid
+      sigmoid_bias: -1.0
+    training_schedule:
+      name: cosine
+      shift: 0.125
+    beta_schedule: cosine_simple_diffusion
+    schedule_fn_kwargs:
+      shifted: 0.125
+      interpolated: false
+  backbone:
+    use_fourier_noise_embedding: true
+    channels: [128, 256, 384, 768]
+    num_updown_blocks: [2, 2, 4]
+    num_mid_blocks: 12
+    num_heads: 6
+    use_checkpointing: [true, true, true, true]
   fixed_context:
     enabled: true
     dropout: 0.0
   tasks:
     prediction:
       enabled: true
-      # Required when dataset.n_frames > algorithm.max_frames.
       sliding_context_len: -1
     interpolation:
       enabled: false
   logging:
     max_num_videos: 8
-    # Start lightweight for bring-up; expand later if needed.
     metrics: [mse, psnr, ssim]
 
 experiment:
+  num_nodes: 1
   training:
     lr: 1e-4
-    batch_size: 4
+    batch_size: 1
     max_epochs: 20
+    checkpointing:
+      every_n_train_steps: 1000
+      every_n_epochs: null
     data:
       num_workers: 8
   validation:
